@@ -65,7 +65,7 @@ if submit:
         "road_connectivity": road_connectivity
     }
 
-    response = requests.post("https://rental-price-api.onrender.com/predict", json=input_data)
+    response = requests.post("https://rental-fastapi.onrender.com/predict", json=input_data)
     if response.status_code == 200:
         result = response.json()
         if "predicted_price" in result:
