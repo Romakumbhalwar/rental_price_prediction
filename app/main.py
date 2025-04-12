@@ -1,43 +1,38 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.schemas import RentalInput
 import joblib
 import numpy as np
+import pandas as pd
+from fastapi import FastAPI
+from app.schemas import RentalInput
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Allow CORS (important if your Streamlit app is hosted separately)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this to your Streamlit app domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load model and encoders
 model = joblib.load("app/model/best_linear_model.pkl")
 encoders = joblib.load("app/model/encoders.pkl")
-
-@app.get("/")
-def root():
-    return {"message": "Rental Price Prediction API is Live!"}
+scaler = joblib.load("app/model/scaler.pkl")
 
 @app.post("/predict")
 def predict_price(data: RentalInput):
     input_dict = data.dict()
 
-    # Encode categorical features
     for col in encoders:
         if col in input_dict:
-            value = str(input_dict[col])
+            value = input_dict[col]
             if value in encoders[col].classes_:
                 input_dict[col] = encoders[col].transform([value])[0]
             else:
-                raise ValueError(f"'{value}' not found in encoder for column '{col}'")
+                return {"error": f"Invalid value '{value}' for column '{col}'"}
 
-    # Convert to array and predict
-    input_array = np.array([list(input_dict.values())])
-    prediction = model.predict(input_array)[0]
+    df = pd.DataFrame([input_dict])
+    df_scaled = scaler.transform(df)
 
+    prediction = model.predict(df_scaled)[0]
     return {"predicted_price": round(prediction, 2)}
