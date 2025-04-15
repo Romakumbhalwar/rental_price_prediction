@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class RentalInput(BaseModel):
+class RentPredictionRequest(BaseModel):
     city: str
     area: str
     location: str
@@ -11,12 +11,4 @@ class RentalInput(BaseModel):
     bathrooms: int
     balcony: int
     furnishing_status: str
-    Number_of_amenities: int
-    security_deposite: float
-    property_age: int
-    brokerage: str
-    floor_no: int
-    maintenance_charge: str
-    nearby_facilities: str
-    type_of_society: str
-    road_connectivity: str
+    number_of_amenities: int

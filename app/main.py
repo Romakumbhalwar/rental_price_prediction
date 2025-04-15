@@ -1,38 +1,49 @@
-import joblib
-import numpy as np
-import pandas as pd
 from fastapi import FastAPI
-from app.schemas import RentalInput
-from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import joblib
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+import numpy as np
+
+# Load the pre-trained model
+loaded_model = joblib.load('app/model/best_rent_model.pkl')
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Schema for the input data
+class RentPredictionRequest(BaseModel):
+    city: str
+    area: str
+    location: str
+    zone: str
+    property_type: str
+    size_in_sqft: float
+    bedrooms: int
+    bathrooms: int
+    balcony: int
+    furnishing_status: str
+    number_of_amenities: int
 
-model = joblib.load("app/model/best_linear_model.pkl")
-encoders = joblib.load("app/model/encoders.pkl")
-scaler = joblib.load("app/model/scaler.pkl")
+# Prediction endpoint
+@app.post("/predict/")
+def predict(request: RentPredictionRequest):
+    # Prepare the input data
+    new_data = pd.DataFrame([{
+        'city': request.city,
+        'area': request.area,
+        'location': request.location,
+        'zone': request.zone,
+        'property_type': request.property_type,
+        'size_in_sqft': request.size_in_sqft,
+        'bedrooms': request.bedrooms,
+        'bathrooms': request.bathrooms,
+        'balcony': request.balcony,
+        'furnishing_status': request.furnishing_status,
+        'number_of_amenities': request.number_of_amenities
+    }])
 
-@app.post("/predict")
-def predict_price(data: RentalInput):
-    input_dict = data.dict()
+    # Predict using the trained model
+    predicted_rent = loaded_model.predict(new_data)
+    return {"predicted_rent": round(predicted_rent[0], 2)}
 
-    for col in encoders:
-        if col in input_dict:
-            value = input_dict[col]
-            if value in encoders[col].classes_:
-                input_dict[col] = encoders[col].transform([value])[0]
-            else:
-                return {"error": f"Invalid value '{value}' for column '{col}'"}
-
-    df = pd.DataFrame([input_dict])
-    df_scaled = scaler.transform(df)
-
-    prediction = model.predict(df_scaled)[0]
-    return {"predicted_price": round(prediction, 2)}
