@@ -1,12 +1,13 @@
 from pydantic import BaseModel
 
-class RentPredictionRequest(BaseModel):
+# Define the input data schema
+class PropertyData(BaseModel):
     city: str
     area: str
     location: str
     zone: str
     property_type: str
-    size_in_sqft: float
+    size_in_sqft: int
     bedrooms: int
     bathrooms: int
     balcony: int
