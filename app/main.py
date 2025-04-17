@@ -44,7 +44,7 @@ def predict_rent(data: PropertyData):
 
     # Predict rent
     try:
-        predicted_rent = model.predict(input_df)
+        predicted_rent = model.predict(input_df)  # Ensure model.predict() is called on the correct object
         print(f"Predicted rent: {predicted_rent}")  # Add debugging print statement
         return {"predicted_rent": int(predicted_rent[0])}
     except Exception as e:
