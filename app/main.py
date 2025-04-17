@@ -10,7 +10,12 @@ model_path = os.path.join(os.path.dirname(__file__), "..", "best_rent_model.pkl"
 
 # Load the trained model
 try:
-    model = joblib.load(model_path)
+    # Load the model (if saved as a dictionary, access the 'model' key)
+    model_data = joblib.load(model_path)
+    if isinstance(model_data, dict) and 'model' in model_data:
+        model = model_data['model']  # Access the actual model
+    else:
+        model = model_data  # If it's directly the model object
     print("✅ Model loaded successfully.")
 except Exception as e:
     print(f"❌ Error loading model: {e}")
