@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import joblib
 import pandas as pd
 import os
-from schemas import PropertyData  # Import the schema from schemas.py
+from app.schemas import PropertyData  # Import the schema from schemas.py
 from fastapi.middleware.cors import CORSMiddleware
 
 # Build the correct path to the model file
