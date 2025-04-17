@@ -11,7 +11,7 @@ model_path = os.path.join(os.path.dirname(__file__), "..", "best_rent_model.pkl"
 # Load the trained model
 try:
     model = joblib.load(model_path)
-    print("✅ Model loaded successfully.")
+    print(f"✅ Model loaded successfully: {type(model)}")  # Debugging print: Check the model type
 except Exception as e:
     print(f"❌ Error loading model: {e}")
     model = None
@@ -44,8 +44,14 @@ def predict_rent(data: PropertyData):
 
     # Predict rent
     try:
-        predicted_rent = model.predict(input_df)  # Ensure model.predict() is called on the correct object
-        print(f"Predicted rent: {predicted_rent}")  # Add debugging print statement
+        # Debugging print: Check the type of the model and input
+        print(f"Model type: {type(model)}")
+        print(f"Input data: {input_df.head()}")
+        
+        # Ensure model.predict() is called on the correct model
+        predicted_rent = model.predict(input_df)
+        print(f"Predicted rent: {predicted_rent}")  # Debugging print
+        
         return {"predicted_rent": int(predicted_rent[0])}
     except Exception as e:
         print(f"Error during prediction: {e}")  # Add debugging print statement
