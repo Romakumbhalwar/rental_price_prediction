@@ -1,47 +1,48 @@
 import streamlit as st
 import requests
 
+st.title("🏠 Rental Price Prediction App")
+
 # Collect user inputs through Streamlit widgets
 city = st.text_input('City', 'Nagpur')
 area = st.text_input('Area', 'hulkeshwar')
 location = st.text_input('Location', 'hulkeshwar, Nagpur, Maharashtra')
-zone = st.selectbox('Zone', ['north', 'south', 'east', 'west'])
-property_type = st.selectbox('Property Type', ['1 RK', '1 BHK Flat', '2 BHK Flat', '3 BHK Flat', '2 BHK House', '3 BHK Independent Floor', '1 BHK House', 'Studio Apartment', 'Independent Apartment'])
-size_in_sqft = st.number_input('Size (sqft)', min_value=0, max_value=4000, value=1000)
-bedrooms = st.number_input('Number of Bedrooms', min_value=0, max_value=5, value=2)
-bathrooms = st.number_input('Number of Bathrooms', min_value=0, max_value=4, value=2)
-balcony = st.number_input('Number of Balconies', min_value=0, max_value=4, value=2)
+zone = st.selectbox('Zone', ['east', 'west', 'north', 'south'])
+property_type = st.selectbox('Property Type', [
+    '1 RK', '1 BHK Flat', '2 BHK Flat', '3 BHK Flat',
+    '2 BHK House', '3 BHK Independent Floor', '1 BHK House',
+    'Studio Apartment', 'Independent Apartment'
+])
+size_in_sqft = st.slider('Size (in sqft)', 0, 4000, 1000)
+bedrooms = st.slider('Number of Bedrooms', 0, 5, 2)
+bathrooms = st.slider('Number of Bathrooms', 0, 4, 2)
+balcony = st.slider('Number of Balconies', 0, 4, 2)
 furnishing_status = st.selectbox('Furnishing Status', ['unfurnished', 'semi-furnished', 'furnished'])
-number_of_amenities = st.number_input('Number of Amenities', min_value=0, max_value=10, value=2)
+number_of_amenities = st.slider('Number of Amenities', 0, 10, 3)
 
-# Form the input data as a dictionary
+# Create input JSON
 input_data = {
-    'city': city,
-    'area': area,
-    'location': location,
-    'zone': zone,
-    'property_type': property_type,
-    'size_in_sqft': size_in_sqft,
-    'bedrooms': bedrooms,
-    'bathrooms': bathrooms,
-    'balcony': balcony,
-    'furnishing_status': furnishing_status,
-    'number_of_amenities': number_of_amenities
+    "city": city,
+    "area": area,
+    "location": location,
+    "zone": zone,
+    "property_type": property_type,
+    "size_in_sqft": size_in_sqft,
+    "bedrooms": bedrooms,
+    "bathrooms": bathrooms,
+    "balcony": balcony,
+    "furnishing_status": furnishing_status,
+    "number_of_amenities": number_of_amenities
 }
 
-# Streamlit app will call the FastAPI endpoint for predictions
-if st.button('Get Predicted Rent'):
-    fastapi_url = "https://rental-price-fastapi.onrender.com/predict"  # Update with your FastAPI URL
-    response = requests.post(fastapi_url, json=input_data)
-
-    # Debugging: check the response status and content
-    st.write("Response from FastAPI:", response.json())  # Display full response from FastAPI
-
-    if response.status_code == 200:
+if st.button("Predict Rent"):
+    with st.spinner("Sending data to prediction API..."):
         try:
-            predicted_rent = response.json()["predicted_rent"]
-            st.write(f"Predicted Rent: ₹{predicted_rent}")
-        except KeyError:
-            st.write("Error: Key 'predicted_rent' not found in response.")
-    else:
-        st.write("Error getting prediction")
+            response = requests.post("https://rental-price-fastapi.onrender.com/predict", json=input_data)
+            result = response.json()
+            if "predicted_rent" in result:
+                st.success(f"💸 Estimated Rent: ₹{result['predicted_rent']}")
+            else:
+                st.error(f"Error: {result.get('error', 'Unknown error occurred')}")
+        except Exception as e:
+            st.error(f"Failed to fetch prediction: {e}")

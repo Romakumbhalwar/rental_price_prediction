@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-# Define the input data schema
 class PropertyData(BaseModel):
     city: str
     area: str
