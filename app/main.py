@@ -2,26 +2,10 @@ from fastapi import FastAPI
 import joblib
 import pandas as pd
 import os
-from app.schemas import PropertyData  # Import the schema from schemas.py
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-# Correct the path to the model file (it is located in the root directory)
-model_path = os.path.join(os.path.dirname(__file__), "..", "best_rent_model.pkl")
-
-# Load the trained model
-try:
-    # Load the model (if saved as a dictionary, access the 'model' key)
-    model_data = joblib.load(model_path)
-    if isinstance(model_data, dict) and 'model' in model_data:
-        model = model_data['model']  # Access the actual model
-    else:
-        model = model_data  # If it's directly the model object
-    print("✅ Model loaded successfully.")
-except Exception as e:
-    print(f"❌ Error loading model: {e}")
-    model = None
-
-# Initialize the FastAPI app
+# Initialize FastAPI app
 app = FastAPI()
 
 # Enable CORS (helpful when calling API from Streamlit or web frontend)
@@ -33,12 +17,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Correct the path to the model file (it is located in the root directory)
+model_path = os.path.join(os.path.dirname(__file__), "..", "best_rent_model.pkl")
+
+# Load the trained model
+try:
+    model = joblib.load(model_path)
+    print("✅ Model loaded successfully.")
+except Exception as e:
+    print(f"❌ Error loading model: {e}")
+    model = None
+
+# Define the input data schema
+class PropertyData(BaseModel):
+    city: str
+    area: str
+    location: str
+    zone: str
+    property_type: str
+    size_in_sqft: int
+    bedrooms: int
+    bathrooms: int
+    balcony: int
+    furnishing_status: str
+    number_of_amenities: int
+
 # Root endpoint
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Rental Price Prediction API. Use /predict to get predictions."}
 
-# Define the prediction endpoint
+# Prediction endpoint in FastAPI
 @app.post("/predict")
 def predict_rent(data: PropertyData):
     if model is None:

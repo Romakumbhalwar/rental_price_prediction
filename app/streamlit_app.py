@@ -32,7 +32,7 @@ input_data = {
 # Streamlit app will call the FastAPI endpoint for predictions
 if st.button('Get Predicted Rent'):
     fastapi_url = "https://rental-price-fastapi.onrender.com/predict"  # Update with your FastAPI URL
-    response = requests.post("https://rental-price-fastapi.onrender.com/predict", json=your_data)
+    response = requests.post(fastapi_url, json=input_data)  # Fixed variable name to 'input_data'
 
     if response.status_code == 200:
         predicted_rent = response.json()["predicted_rent"]
