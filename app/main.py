@@ -28,6 +28,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root endpoint
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Rental Price Prediction API. Use /predict to get predictions."}
+
 # Define the prediction endpoint
 @app.post("/predict")
 def predict_rent(data: PropertyData):
