@@ -34,8 +34,14 @@ if st.button('Get Predicted Rent'):
     fastapi_url = "https://rental-price-fastapi.onrender.com/predict"  # Update with your FastAPI URL
     response = requests.post(fastapi_url, json=input_data)
 
+    # Debugging: check the response status and content
+    st.write("Response from FastAPI:", response.json())  # Display full response from FastAPI
+
     if response.status_code == 200:
-        predicted_rent = response.json()["predicted_rent"]
-        st.write(f"Predicted Rent: ₹{predicted_rent}")
+        try:
+            predicted_rent = response.json()["predicted_rent"]
+            st.write(f"Predicted Rent: ₹{predicted_rent}")
+        except KeyError:
+            st.write("Error: Key 'predicted_rent' not found in response.")
     else:
         st.write("Error getting prediction")

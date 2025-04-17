@@ -45,6 +45,8 @@ def predict_rent(data: PropertyData):
     # Predict rent
     try:
         predicted_rent = model.predict(input_df)
+        print(f"Predicted rent: {predicted_rent}")  # Add debugging print statement
         return {"predicted_rent": int(predicted_rent[0])}
     except Exception as e:
+        print(f"Error during prediction: {e}")  # Add debugging print statement
         return {"error": f"Prediction failed: {e}"}
