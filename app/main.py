@@ -5,8 +5,8 @@ import os
 from app.schemas import PropertyData  # Import the schema from schemas.py
 from fastapi.middleware.cors import CORSMiddleware
 
-# Correct the path to the model file based on its location in rental_price_prediction folder
-model_path = os.path.join(os.path.dirname(__file__), "best_rent_model.pkl")
+# Correct the path to the model file (it is located in the root directory)
+model_path = os.path.join(os.path.dirname(__file__), "..", "best_rent_model.pkl")
 
 # Load the trained model
 try:
