@@ -2,20 +2,8 @@ from fastapi import FastAPI
 import joblib
 import pandas as pd
 import os
-from pydantic import BaseModel
+from app.schemas import PropertyData  # Import the schema from schemas.py
 from fastapi.middleware.cors import CORSMiddleware
-
-# Initialize FastAPI app
-app = FastAPI()
-
-# Enable CORS (helpful when calling API from Streamlit or web frontend)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (for development)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Correct the path to the model file (it is located in the root directory)
 model_path = os.path.join(os.path.dirname(__file__), "..", "best_rent_model.pkl")
@@ -28,26 +16,24 @@ except Exception as e:
     print(f"❌ Error loading model: {e}")
     model = None
 
-# Define the input data schema
-class PropertyData(BaseModel):
-    city: str
-    area: str
-    location: str
-    zone: str
-    property_type: str
-    size_in_sqft: int
-    bedrooms: int
-    bathrooms: int
-    balcony: int
-    furnishing_status: str
-    number_of_amenities: int
+# Initialize the FastAPI app
+app = FastAPI()
+
+# Enable CORS (helpful when calling API from Streamlit or web frontend)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins (for development)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Root endpoint
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Rental Price Prediction API. Use /predict to get predictions."}
 
-# Prediction endpoint in FastAPI
+# Define the prediction endpoint
 @app.post("/predict")
 def predict_rent(data: PropertyData):
     if model is None:
