@@ -29,9 +29,18 @@ def predict_rent(data: RentInput):
         # Ensure feature order matches training
         input_df = input_df[model_features]
 
+        # Ensure that all necessary columns are present
+        missing_features = [col for col in model_features if col not in input_df.columns]
+        if missing_features:
+            return {"error": f"Missing features: {', '.join(missing_features)}"}
+
+        # Make the prediction using the trained model
         prediction = model.predict(input_df)
 
-        return {"predicted_rent": round(prediction[0], 2)}
-    
+        # Convert prediction to float if needed
+        prediction_result = float(prediction[0])
+
+        return {"predicted_rent": round(prediction_result, 2)}
+
     except Exception as e:
         return {"error": str(e)}
