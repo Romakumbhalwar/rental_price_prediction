@@ -2,20 +2,21 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
 import joblib
-import os
 
 app = FastAPI()
 
-# Load model
-model = None
+# Load the model
 try:
-    model_data = joblib.load("app/model/best_rent_model.pkl")  # adjust if path is different
-    model = model_data["model"]  # ✅ extract the model from dict
-    print("✅ Model loaded successfully:", type(model))
+    model_dict = joblib.load("best_rent_model.pkl")
+    model = model_dict["model"]
+    features = model_dict["features"]
+    print(f"✅ Model loaded successfully: {type(model)}")
 except Exception as e:
-    print("❌ Error loading model:", e)
+    print(f"❌ Error loading model: {e}")
+    model = None
+    features = None
 
-# Input schema
+# Define the input data schema
 class PropertyData(BaseModel):
     city: str
     area: str
@@ -29,15 +30,16 @@ class PropertyData(BaseModel):
     furnishing_status: str
     number_of_amenities: int
 
+# POST route only
 @app.post("/predict")
 def predict_rent(data: PropertyData):
     if model is None:
-        return {"error": "Model is not loaded properly"}
-
-    input_df = pd.DataFrame([data.dict()])
+        return {"error": "Model not loaded."}
     
+    input_df = pd.DataFrame([data.dict()])
+
     try:
-        predicted_rent = model.predict(input_df)
-        return {"predicted_rent": int(predicted_rent[0])}
+        prediction = model.predict(input_df)
+        return {"predicted_rent": int(prediction[0])}
     except Exception as e:
         return {"error": f"Prediction failed: {e}"}
