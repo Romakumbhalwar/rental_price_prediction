@@ -4,6 +4,8 @@ This project predicts the rent price of residential properties using a
 Linear Regression model trained on a dataset of housing features. 
 It uses scikit-learn for model training and one-hot encoding for categorical features.
 
+live demo: https://rental-price-frontend.onrender.com
+
 Features Used
 - City
 - Area
